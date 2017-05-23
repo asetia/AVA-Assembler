@@ -1,0 +1,205 @@
+MOV 0					// r0 = 0
+LDR r1, 1				// r1 = mem[1]
+LDR r2, 2				// r2 = mem[2]
+LDR r3, 3				// r3 = mem[3]
+LDR r4, 4				// r4 = mem[4]
+MOV 3					// r0 = 3
+ADI r5, 0				// r5 = 0 (t_temp)
+ADI r6, 0				// r6 = 0  (i)
+mainloop:
+MOV 3
+CMP r3, 0				// if r3 >= 0, then C = 1
+BR 0, label2				// if C = 1, branch to label2
+MOV 3
+ADI r7, 0				// r7 = 0
+MOV 9
+STR r1, 0				// mem[9] = r1 aka MSB of x_temp
+STR r2, 1				// mem[10] = r2 aka LSBs of x_temp
+STR r3, 2				// mem[11] = r3 aka MSBs of y_temp
+STR r4, 3				// mem[12] = r4 aka LSBs of y_temp
+STR r5, 4				// mem[13] = r5 aka MSBs of t_temp
+STR r6, 5				// mem[14] = r6 aka LSBs of t_temp 
+MOV 2
+ADR r4, r4				// r4 = ~r4 + 1
+ADR r3, r3				// r3 = ~r3 + 1
+MOV 1
+ADI r3, 1				// r3 = 	r3 - 1 	
+label10:
+MOV 4
+ADR r7, r6				// if r7 == r6, C =1, else C = 0
+BR 0, label11				// branch to label3 if C = 1
+MOV 11
+ADR r3, r4				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label10
+label11:
+MOV 0
+ADR r2, r4				// r2 = r2 + r4 (LSBs)
+ADR r1, r3				// r1 = r1 + r3 (MSBs)
+MOV 15
+STR r1, 0				// mem[15] = r1 aka MSBs of x_new
+STR r2, 1				// mem[16] = r2 aka LSBs of x_new	
+MOV 10
+LDR r1, 0				// r1 = mem[9] aka original x_temp MSB
+LDR r2, 1				// r2 = mem[10] aka original x_temp LSB	
+LDR r3, 2				// r3 = mem[11] aka original y_temp MSB
+LDR r4, 3				// r4 = mem[12] aka original y_temp LSB
+MOV 3
+ADI r7, 0				// r7 = 0
+label12:
+MOV 4
+ADR r7, r6				// if r7 == r6, C =1, else C = 0
+BR 0, label13				// branch to label3 if C = 1
+MOV 11
+ADR r1, r2				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label12
+label13:
+MOV 0
+ADR r4, r2				// r4 = r4 + r2
+ADR r3, r1				// r3 = r3 + r1
+MOV 17
+STR r3, 0				// mem[17] = r3 aka MSBs of y_new
+STR r4, 1				// mem[18] = r4 aka LSBs of y_new
+MOV 10
+LDR r1, 0				// r1 = mem[9] aka original x_temp MSB
+LDR r2, 1				// r2 = mem[10] aka original x_temp LSB	
+LDR r3, 2				// r3 = mem[11] aka original y_temp MSB
+LDR r4, 3				// r4 = mem[12] aka original y_temp LSB
+MOV 5
+ADI r1, 4				//clearing r1
+ADI r1, 4
+MOV 0
+ADI r1, 7				// r1 = 7
+ADI r1, 4				// r1 = 11
+MOV 1
+ADR r1, r6				// r1 = r1 - r6 (11-i)
+MOV 3
+ADI r7, 0
+MOV 3
+ADI r2, 0				// LSBs of 1
+ADI r3, 1				// MSBs of 1
+label14:
+MOV 4
+ADR r7, r1				// if r7 == r6, C =1, else C = 0
+BR 0, label13				// branch to label7 if C = 1
+MOV 7
+ADR r2, r3				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label14
+label13:
+MOV 1
+ADR r6, r2				// t_new = LSBs of t_temp + LSBs of (1<<(11-i))
+ADR r5, r1				// t_new = MSBs of t_temp + MSBs of (1<<(11-i))
+MOV 15
+LDR r1, 0				// x_temp LSBs  = x_new LSBs // r1 = mem[15]
+LDR r2, 1				// x_temp MSBs = x_new MSBs // r2 = mem[16]
+LDR r1, 2				// y_temp LSBs  = y_new LSBs // r1 = mem[17]
+LDR r2, 3 				// y_temp MSBs = y_new MSBs // r2 = mem[18]
+BR 1, label9
+label2:
+MOV 3
+ADI r7, 0				// r7 = 0
+MOV 9
+STR r1, 0				// mem[9] = r1 aka MSB of x_temp
+STR r2, 1				// mem[10] = r2 aka LSBs of x_temp
+STR r3, 2				// mem[11] = r3 aka MSBs of y_temp
+STR r4, 3				// mem[12] = r4 aka LSBs of y_temp
+STR r5, 4				// mem[13] = r5 aka MSBs of t_temp
+STR r6, 5				// mem[14] = r6 aka LSBs of t_temp 
+label4:
+MOV 4
+ADR r7, r6				// if r7 == r6, C =1, else C = 0
+BR 0, label3				// branch to label3 if C = 1
+MOV 11
+ADR r3, r4				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label4
+label3:
+MOV 0
+ADR r2, r4				// r2 = r2 + r4 (LSBs)
+ADR r1, r3				// r1 = r1 + r3 (MSBs)
+MOV 15
+STR r1, 0				// mem[15] = r1 aka MSBs of x_new
+STR r2, 1				// mem[16] = r2 aka LSBs of x_new	
+MOV 10
+LDR r1, 0				// r1 = mem[9] aka original x_temp MSB
+LDR r2, 1				// r2 = mem[10] aka original x_temp LSB	
+LDR r3, 2				// r3 = mem[11] aka original y_temp MSB
+LDR r4, 3				// r4 = mem[12] aka original y_temp LSB
+MOV 2
+ADR r2, r2				// r2 = ~r2 + 1
+ADR r1, r1				// r1 = ~r1 + 1
+MOV 1
+ADI r1, 1				// r1 = 	r1 - 1 	
+MOV 3
+ADI r7, 0				// r7 = 0
+label6:
+MOV 4
+ADR r7, r6				// if r7 == r6, C =1, else C = 0
+BR 0, label5				// branch to label3 if C = 1
+MOV 11
+ADR r1, r2				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label6
+label5:
+MOV 0
+ADR r4, r2				// r4 = r4 + r2
+ADR r3, r1				// r3 = r3 + r1
+MOV 17
+STR r3, 0				// mem[17] = r3 aka MSBs of y_new
+STR r4, 1				// mem[18] = r4 aka LSBs of y_new
+MOV 5
+ADI r1, 4				//clearing r1
+ADI r1, 4
+MOV 0
+ADI r1, 7				// r1 = 7
+ADI r1, 4				// r1 = 11
+MOV 1
+ADR r1, r6				// r1 = r1 - r6 (11-i)
+MOV 3
+ADI r7, 0
+MOV 3
+ADI r2, 0				// LSBs of 1
+ADI r3, 1				// MSBs of 1
+label8:
+MOV 4
+ADR r7, r6				// if r7 == r6, C =1, else C = 0
+BR 0, label7				// branch to label7 if C = 1
+MOV 7
+ADR r2, r3				// r3 >>> 1, r4 >>> 1 & r4’s MSB becomes r3’s LSB
+MOV 0 
+ADI r7, 1
+BR 1, label8
+label7:
+MOV 13
+LDR r5, 0				// r1 = mem[13] aka original t_temp MSB
+LDR r6, 1				// r2 = mem[14] aka original t_temp LSB
+MOV 0
+ADR r6, r2				// t_new = LSBs of t_temp + LSBs of (1<<(11-i))
+ADR r5, r1				// t_new = MSBs of t_temp + MSBs of (1<<(11-i))
+label9:
+MOV 15
+LDR r1, 0				// x_temp LSBs  = x_new LSBs // r1 = mem[15]
+LDR r2, 1				// x_temp MSBs = x_new MSBs // r2 = mem[16]
+LDR r1, 2				// y_temp LSBs  = y_new LSBs // r1 = mem[17]
+LDR r2, 3 				// y_temp MSBs = y_new MSBs // r2 = mem[18]
+ADI r7, 4				//clearing r7
+ADI r7, 4
+MOV 0
+ADI r7, 7
+ADI r7, 5				// r7 = 12
+MOV 12
+ADR r6, r7				// if r6 < r7, then C = 1 else C = 0
+BR 0, mainloop
+MOV 5
+STR r1, 0
+STR r2, 1
+STR r5, 2
+STR r6, 3
+HTl

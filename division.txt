@@ -1,0 +1,182 @@
+MOV 3			// r0 = 3
+ADI r1, 4		// r1 = 4
+MOV 6			// r0 = 6
+ADI r1, 5		// r1 << 5 -> r1 = 128	
+LDR r1, 0		// MSB dividend r1 (mem[128])
+LDR r2, 1		// LSB dividend r2 (mem[129])
+LDR r3, 2		// divisor r3 (mem[130])
+ADI r4, 0		// MSB quotient r4
+ADI r5, 0		// LSB quotient r5
+MOV 4			// r0 = 4
+CMP r3, 0		// check if divisor == 0
+BR 0, eq		// if == 0, branch to end
+ADI r6, 0		// div msb = 0
+ADI r7, 0		// div lsb = 0
+MOV 6			// r0 = 6
+ADI r2, 7		// r2 = r2 << 7
+MOV 05		// r0 = 5
+ADI r2, 7		// r2 = r2 >> 7 (clear 7 leftmost bits so r2 is dividend[15]
+MOV 5			// r0 = 4
+CMP r2, 1		// check if dividend[15] != 1
+MOV 3			// r0 = 3
+ADI r1, 4		// r1 = 4
+MOV 6			// r0 = 6
+ADI r1, 5		// r1 << 5 -> r1 = 128	
+LDR r2, 1		// LSB dividend r2 (mem[129])
+BR 0, blueelse	// branch to blueelse if dividend[15] != 1
+blueif:
+ADI r1, 1		// dividend_neg = 1'b1;
+MOV 0			// r0 = 0
+STR r1, 0		// store dividend_neg @ mem[0]
+MOV 2			// r0= 2
+ADR r1, r1		// dividend_temp = ~dividend + 1'b1;
+ADR r2, r2		
+BR 1, pinkif		// jump to pinkif (so as not to execute blueelse)
+blueelse:
+ADI r1, 0		// dividend_neg = 1'b0;
+MOV 0			// r0 = 0
+STR r1, 0		// store dividend_neg @ mem[0]
+pinkif:
+MOV 7			// r0 = 7
+STR r3, 0		// put divisor in mem[7]
+STR r4, 1 // mem[8]
+MOV 6
+ADI r3, 7
+MOV 5
+ADI r3, 7 // clear leftmost 7 bits of divisor
+MOV 3
+ADI r4, 1 
+MOV 13
+ADR r3, r4 // check if they are not equal
+BR 0, pinkelse	
+ADI r1, 1		// divisor_neg = 1'b1;
+MOV 0			// r0 = 0
+STR r1, 1		// store divisor_neg @ mem[1]
+MOV 2			// r0= 2
+ADI r3, r3		// divisor_temp = ~divisor + 1'b1;
+BR 1, mainloop	// jump to mainloop (so as not to execute pinkelse)
+pinkelse:
+ADI r1, 0		// divisor_neg = 1'b0;
+MOV 0			// r0 = 0
+STR r1, 1		// store divisor_neg @ mem[1]
+mainloop:
+MOV 6			// r0 = 6
+ADI r6, 1		// r6 << 1
+MOV 0			// r0 = 0
+STR r7, 2		// mem[2] = LSB div
+MOV 5			// r0 = 5
+ADI r7, 7		// r7 >> 7
+MOV 0			// r0 = 0
+ADR r6, r7		// effectively add MSb of LSB of div onto LSb of MSB of div
+MOV 2			// r0 = 2
+LDR r7, 2		// r7 = mem[2] (LSB div)
+MOV 6			// r0 = 6
+ADI r7, 1		// r7 << 1 (now, div in its entirety has been shifted left 1 bit)
+MOV 0
+MOV 0			// r0 = 0
+STR r1, 3		// mem[3] = MSB dividend_temp
+STR r2, 4		// mem[4] = LSB dividend_temp
+MOV 0			// r0 = 0
+CMP r3, 7		// if i < 7, we should be finding the bit in LSB, if else then MSB
+BR 0, msb
+lsb:
+MOV 5			// r0 = 5
+ADR r1, r3		// r1 = r1 >> r3 (dividend_temp LSB >> i)
+MOV 0
+ADR r7, r1		// div[0] = dividend_temp[15-i]
+MOV 0
+LDR r1, 4		// restore LSB dividend_temp into r2
+BR 1, done		// done with this nonsense
+msb:
+MOV 1			// r0 = 1
+ADI r3, 4		// i = i - 4
+ADI r3, 4		// i = i - 4
+MOV 0
+ADR r2, r3		// r2 = r2 >> r3 (dividend_temp MSB >> i)
+MOV 0
+LDR r2, 3		// restore MSB dividend_temp into r1
+MOV 0
+ADI r3, 4		// i = i - 4
+ADI r3, 4		// i = i - 4
+done:		// now  div = {div[14:0],dividend_temp[15-i]}; 
+MOV 0
+STR r3, 2		// mem[2] = i
+LDR r3, 1		// r3 = divisor_temp
+MOV 9			// r0 = 9
+ADR r7, r3		// check if div_lo >= divisor_temp
+BR 0, gte		// if so, go to gte … else check if div_hi > 0
+MOV 2			// r0 = 2
+CMP r6, 0		// check if div_hi > 0
+BR 0, gte		// if so, go to gte
+BR 1, ngte		// if not, go to ngte			
+gte:
+MOV 1			// r0 = 1
+ADR r7, r3		// div_lo = div_lo - divisor_temp
+MOV 9			// r0 = 9
+ADR r6, r0		// div_hi = div_hi - borrow
+MOV 6			// r0 = 6
+ADI r4, 1		// r6 << 1
+MOV 0			// r0 = 0
+STR r5, 2		// mem[2] = LSB quotient
+MOV 5			// r0 = 5
+ADI r5, 7		// r5 >> 7
+MOV 0			// r0 = 0
+ADR r4, r5		// effectively add MSb of LSB of div onto LSb of MSB of div
+MOV 2			// r0 = 2
+LDR r4, 2		// r4 = mem[2] (LSB quotient)
+MOV 6			// r0 = 6
+ADI r5, 1		// r5 << 1 (now, div in its entirety has been shifted left 1 bit)
+MOV 0			// r0 = 0
+ADI r5, 1		// r5 += 1
+BR 1 endif		// skip ngte (jump past)
+ngte:
+MOV 6			// r0 = 6
+ADI r4, 1		// r6 << 1
+MOV 0			// r0 = 0
+STR r5, 2		// mem[2] = LSB quotient
+MOV 5			// r0 = 5
+ADI r5, 7		// r5 >> 7
+MOV 0			// r0 = 0
+ADR r4, r5		// effectively add MSb of LSB of div onto LSb of MSB of div
+MOV 2			// r0 = 2
+LDR r4, 2		// r4 = mem[2] (LSB quotient)
+MOV 6			// r0 = 6
+ADI r5, 1		// r5 << 1 (now, div in its entirety has been shifted left 1 bit)
+MOV 0			// r0 = 0
+ADI r5, 0		// r5 += 0
+endif:
+MOV 0
+STR r3, 1		// mem[1] = divisor_temp
+LDR r3, 2		// r3 = i
+ADI r3, 1		// r3++ (i++)
+MOV 0
+STR r4, 5		// mem[5] = MSB quotient
+MOV 3
+ADI r4, 4		// r4 = 8
+ADI r4, 4
+ADI r4, 4
+ADI r4, 4		// r4 = 16
+MOV 4			// r0 = 0
+ADI r3, r4		// check if i < 16
+MOV 0
+LDR r4, 5		// r4 = mem[5] (MSB quotient)
+BR 0, mainloop	// return to mainloop if i < 16
+MOV 0			// r0 = 0
+LDR r1, 0		// r1 = dividend_neg
+LDR r2, 1		// r2 = divisor_neg
+ADR r1, r2		// if r1 == r2
+BR 0, eq		// if(divident_neg == divisor_neg) else cont
+ADI r4, r4		// if(dividend_neg!=divisor_neg)
+ADI r5, r5		// quotient = ~quotient +1'b1; 
+eq:
+MOV 3
+ADI r1, 4		// r1 = 4
+MOV 6
+ADI r1, 5		// r1 << 5 -> r1 = 128
+MOV 1
+ADI r1, 2		// r1 = 126
+STR r4, 0		// stores MSB
+MOV 0
+ADI r1, 1		// r1 = 127
+STR r5, 0		// stores LSB
+HT			// done

@@ -1,0 +1,62 @@
+MOV 32		// r0 = 32 because string starts at 32
+LDR r1, 0		// r1 = mem[32] i.e. the first 8 bits of the string in r1
+LDR r2, 1		// r2 = mem[33]
+MOV 9			// r0 = 9 because sequence is 4 LSBs of 9
+LDR r3, 0		// r3 = mem[9] i.e. sequence
+MOV 6
+ADI r3, 4		// moving the sequence to the 4 MSBs of r3
+ADI r4, 4		// r4 = r4 << 8	i.e. clearing the bits so r4 = 0 (count)
+ADI r4, 4
+ADI r5, 4		// r5 = 0 (incrementer)
+ADI r5, 4
+MOV 3
+ADI r5, 4
+MOV 6
+ADI r5, 4		// r5 = 64
+ADI r6, 4		// r6 = 0 (string shift counter)
+ADI r6, 4
+MOV 3
+ADI r6, 4
+MOV 6
+ADI r6, 1		// r6 = 8 (string shift counter)
+ADI r7, 4		
+ADI r7, 4
+MOV 3
+ADI r7, 4
+MOV 6
+ADI r7, 3		// r7 = 32
+MOV 0
+ADI r7, 1		// r7 = 33 (next mem address of next 8 bits)
+1: 
+MOV 3
+ADR r1, r3	//compare MSBs
+BR 0, 2	//if not equal, move on
+MOV 0
+ADI r4, 1	//increment count
+2:
+MOV 7		
+ADR r1, r2	//move MSB of R2 to LSB of R1
+MOV 1
+ADI r6, 1	//decrement 8-bit counter
+MOV 2
+CMP r6, 0       //if r6 > 0
+BR 0, 1
+ADI r6, 4		// r6 = 0 (string shift counter)
+ADI r6, 4
+MOV 3
+ADI r6, 4
+MOV 6
+ADI r6, 1		// r6 = 8 (string shift counter)
+MOV 1
+ADI r5, 1
+MOV 2
+CMP r5, 0
+MOV 0
+ADI r7, 1
+MOV 8
+ADR r0, r7
+LDR r2, 0
+BR 0, 1
+MOV 10
+STR r4, 0
+HT
